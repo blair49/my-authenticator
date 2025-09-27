@@ -7,7 +7,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -64,9 +63,7 @@ import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 import java.nio.ByteBuffer
-import java.security.InvalidKeyException
-import java.security.NoSuchAlgorithmException
-import java.util.* 
+import java.util.*
 import java.util.concurrent.Executors
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -183,7 +180,7 @@ object Base32 {
         return try {
             decode(s)
             true
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             false
         }
     }
@@ -265,7 +262,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+        val keyguardManager = getSystemService(KEYGUARD_SERVICE) as KeyguardManager
         val deviceIsSecure = keyguardManager.isDeviceSecure
 
         val loadedAccounts = loadAccountsFromFile(this)
@@ -499,10 +496,15 @@ fun MainDashboardScreen(
     onEditAccount: (Account) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(modifier = modifier.padding(vertical = 8.dp)) {
-        items(accounts, key = { account -> account.id }) { account ->
-            AccountCard(account = account, onDelete = onDeleteAccount, onEdit = onEditAccount)
+    if(accounts.isNotEmpty()){
+        LazyColumn(modifier = modifier.padding(vertical = 8.dp)) {
+            items(accounts, key = { account -> account.id }) { account ->
+                AccountCard(account = account, onDelete = onDeleteAccount, onEdit = onEditAccount)
+            }
         }
+    }
+    else{
+        Text("No accounts added. Use the '+' button to add one.", modifier = Modifier.padding(16.dp))
     }
 }
 
@@ -725,7 +727,7 @@ private class QrCodeAnalyzer(private val onQrCodeScanned: (String) -> Unit) : Im
                 val result = reader.decodeWithState(binaryBitmap)
                 Log.d(TAG_QR_ANALYZER, "QR Code decoded: ${result.text}")
                 onQrCodeScanned(result.text)
-            } catch (e: NotFoundException) {
+            } catch (_: NotFoundException) {
                 // No QR code found, expected case, can be noisy if logged every frame
             } catch (e: Exception) {
                 Log.e(TAG_QR_ANALYZER, "Error decoding QR code content: ${e.message}", e)

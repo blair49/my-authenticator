@@ -5,6 +5,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("release") {
+            storeFile = file("C:\\Users\\Blair\\myandroidkeystore.jks")
+            storePassword = "Blair@0123"
+            keyAlias = "key0"
+            keyPassword = "Blair@0123"
+        }
+    }
     namespace = "com.blairfernandes.myauthenticator"
     compileSdk = 36
 
@@ -20,11 +28,13 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
